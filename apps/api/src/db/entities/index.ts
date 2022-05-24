@@ -1,0 +1,1 @@
+export { ProfileEntity } from './ProfileEntity'

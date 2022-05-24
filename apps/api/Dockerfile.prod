@@ -1,0 +1,27 @@
+FROM node:14.19.3-alpine3.15
+WORKDIR /usr/src/app
+RUN wget https://github.com/channable/vaultenv/releases/download/v0.14.0/vaultenv-0.14.0-linux-musl -O ./vaultenv && chmod +x ./vaultenv
+
+COPY package.json .
+COPY yarn.lock .
+COPY . .
+
+RUN yarn install 
+
+RUN yarn build
+
+## this is stage two , where the app actually runs
+
+FROM node:14.19.3-alpine3.15
+ENV NODE_ENVIRONMENT production
+WORKDIR /usr/src/app
+COPY package.json .
+COPY yarn.lock .
+COPY vaultenv.secrets .
+COPY --from=0 /usr/src/app/lib ./lib
+COPY --from=0 /usr/src/app/assets ./assets
+## Prepare for vault execution
+COPY --from=0 /usr/src/app/vaultenv ./vaultenv
+RUN yarn install --only=production 
+EXPOSE 5000
+CMD yarn start:withVault

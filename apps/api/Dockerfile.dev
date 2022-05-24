@@ -1,0 +1,15 @@
+FROM peatisdocking/ts-node-12-alpine
+ENV NODE_ENVIRONMENT dev
+WORKDIR /usr/src/app
+
+RUN wget https://github.com/channable/vaultenv/releases/download/v0.14.0/vaultenv-0.14.0-linux-musl -O ./vaultenv
+
+# Ensure package.json and package-lock.json is copied.
+COPY . .
+RUN chmod +x ./vaultenv
+
+# Application Port
+EXPOSE 3000
+
+# Run command
+CMD [ "yarn", "dev:docker" ]

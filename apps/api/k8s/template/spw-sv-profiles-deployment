@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $GIT_REPO_NAME
+  namespace: superapp
+  labels:
+    app: $GIT_REPO_NAME
+spec:
+  replicas: $REPLICAS
+  selector:
+    matchLabels:
+      app: $GIT_REPO_NAME
+  template:
+    metadata:
+      labels:
+        app: $GIT_REPO_NAME
+    spec:
+      imagePullSecrets:
+      - name: spw-registry
+      containers:
+      - name: $GIT_REPO_NAME
+        livenessProbe:
+          httpGet:
+            path: /$SERVICE_PATH/healthcheck/ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /$SERVICE_PATH/healthcheck/ready
+            port: 3000
+          periodSeconds: 5
+        image: registry.onesiam.com/superapp/$GIT_REPO_NAME/$GIT_REPO_NAME-$STAGE:$GIT_COMMIT_ID
+        ports:
+        - containerPort: 3000
+        imagePullPolicy: Always
+        envFrom:
+          - secretRef:
+              name: sv-$SERVICE_NAME-secret
+        resources:
+          limits:
+            memory: $LIMIT_MEMORY
+            cpu: $LIMIT_CPU
+          requests:
+            memory: $REQUEST_MEMORY
+            cpu: $REQUEST_CPU
+    

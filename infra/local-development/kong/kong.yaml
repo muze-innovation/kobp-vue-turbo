@@ -1,0 +1,17 @@
+_format_version: "1.1"
+
+services:
+  - name: lvcmr-sv-core
+    url: http://host.docker.internal:3000/
+
+routes:
+  - name: api-route
+    service: lvcmr-sv-core
+    strip_path: false
+    # Register plugin for endpoint that we map against here.
+    # plugins: 
+    #   - name: custom-auth
+    #     config:
+    #       validation_endpoint: http://authorizer:7001
+    paths:
+    - /core

@@ -1,0 +1,91 @@
+version: '3'
+
+networks:
+  elastic:
+
+volumes:
+  rds_data:
+  es_data:
+
+services:
+  rds:
+    image: postgres:11.11 # matched Huawei version.
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+      - APP_DB_USER=docker_oper
+      - APP_DB_PASS=docker_pass
+      - APP_DB_NAMES=lvcmr_core
+    volumes:
+      - ./rds/db:/docker-entrypoint-initdb.d/
+      - ./rds/scripts:/var/scripts/
+      - rds_data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+    
+  # Fixing version
+  redis:
+    image: redis:6.2
+    command: [ "redis-server", "--appendonly", "yes" ]
+    ports:
+      - 6379:6379
+
+  # Development's API GW
+  # authorizer:
+  #   build: 
+  #     context: ./authorizer
+  #     dockerfile: ./dockerfile
+  #   environment:
+  #     DEV_X_API_KEY: 8a14861844ccdbeed423ecc49e7d20ba
+  #     incart_endpoint_url: https://qa.incart.co
+  #     guest_jwt_secret: 'ker8YdeQC4bJ5OUPo52hqA430zdEFA'
+  #     guest_jwt_algo: HS384
+  #     stage: local
+  
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:7.14.2
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment: 
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+
+  kong:
+    image: kong:2.5.0
+    # depends_on:
+    #   - authorizer
+    ports:
+      - "8000:8000" # Listener
+      - "8001:8001" # Admin API
+      - "8443:8443" # Listener  (SSL)
+      - "8444:8444" # Admin API (SSL)
+    volumes:
+      - ./kong/custom-auth:/usr/local/share/lua/5.1/kong/plugins/custom-auth
+      - ./kong/kong.yaml:/kong.yaml
+    environment:
+      KONG_PLUGINS:          bundled,custom-auth
+      KONG_DECLARATIVE_CONFIG: /kong.yaml
+      KONG_NGINX_PROXY_SET:  $$session_secret c2lsZW5jZWlzZ29sZGVu
+      KONG_DATABASE:         'off'
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG:  /dev/stderr
+      KONG_ADMIN_ERROR_LOG:  /dev/stderr
+      KONG_PROXY_LISTEN:     0.0.0.0:8000, 0.0.0.0:8443 ssl
+      KONG_ADMIN_LISTEN:     0.0.0.0:8001, 0.0.0.0:8444 ssl

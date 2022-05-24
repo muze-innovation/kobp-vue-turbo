@@ -1,0 +1,52 @@
+version: '3'
+
+volumes:
+  sv-node_modules:
+services:
+  rds:
+    image: postgres:11.11-alpine # matched Huawei version. ## event test
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+      - APP_DB_USER=docker_oper
+      - APP_DB_PASS=docker_pass
+      - APP_DB_NAMES=spw_exo;spw_profile
+    volumes:
+      - .dev/rds/:/docker-entrypoint-initdb.d/
+    
+  redis:
+    image: redis:6.2-alpine3.13
+    command: [ "redis-server", "--appendonly", "yes" ]
+  
+  sv-profiles:
+    depends_on:
+      - rds
+      - redis
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.dev
+    environment:
+      STAGE: local
+      DB_HOST: rds
+      DB_NAME: spw_profile
+      DB_PORT: 5432
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      DB_MIGRATE_USERNAME: root
+      DB_MIGRATE_PASSWORD: password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD:
+
+    volumes:
+      - sv-node_modules:/usr/src/app/node_modules/
+      - ./coverage:/usr/src/app/coverage
+      - ./:/usr/src/app/
+    ports:
+      - "3000:3000"
+    command: [ "yarn", "dev:docker" ]
