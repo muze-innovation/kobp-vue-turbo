@@ -1,77 +1,28 @@
-# Turborepo starter
+# Monorepo Template for Service + Dashboard
 
-This is an official Yarn v1 starter turborepo.
+**WARNING** This repo is still work in progress.
 
-## What's inside?
-
-This turborepo uses [Yarn](https://classic.yarnpkg.com/lang/en/) as a package manager. It includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org) app
-- `web`: another [Next.js](https://nextjs.org) app
-- `ui`: a stub React component library shared by both `web` and `docs` applications
-- `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `tsconfig`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-## Setup
-
-This repository is used in the `npx create-turbo` command, and selected when choosing which package manager you wish to use with your monorepo (Yarn).
-
-### Build
-
-To build all apps and packages, run the following command:
+## TODO
 
 ```
-cd my-turborepo
-yarn run build
+[ ] install vue.js (Nuxt)
+[ ] package the repeated source code as library instead of embed in applications' folder.
+[ ] readme
+[ ] authorizer
 ```
 
-### Develop
+## Feature
 
-To develop all apps and packages, run the following command:
+- Service using `kobp` (Service that can run on K8s), using Postgres Database as an example.
+- Dashboard application that runs on Vue (WIP)
+- Implemented API Gateway using `kong` see `infra/local-development`
 
-```
-cd my-turborepo
-yarn run dev
-```
+## Getting started
 
-### Remote Caching
+Using node v14. (see ~/.nvmrc).
 
-Turborepo can use a technique known as [Remote Caching (Beta)](https://turborepo.org/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+To spin up infra structure. `yarn infra:up`
 
-By default, Turborepo will cache locally. To enable Remote Caching (Beta) you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
+To drop the infra structure. `yarn infra:down`
 
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Pipelines](https://turborepo.org/docs/core-concepts/pipelines)
-- [Caching](https://turborepo.org/docs/core-concepts/caching)
-- [Remote Caching (Beta)](https://turborepo.org/docs/core-concepts/remote-caching)
-- [Scoped Tasks](https://turborepo.org/docs/core-concepts/scopes)
-- [Configuration Options](https://turborepo.org/docs/reference/configuration)
-- [CLI Usage](https://turborepo.org/docs/reference/command-line-reference)
+NOTE: By spin up vs down it doesn't destroy the docker's volume.
