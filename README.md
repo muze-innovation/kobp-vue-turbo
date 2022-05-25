@@ -5,9 +5,11 @@
 ## TODO
 
 ```
+[ ] README (Service) How to run Integral Tests
+[ ] README (Service) How to run e2e Tests
 [ ] install vue.js (Nuxt)
 [ ] package the repeated source code as library instead of embed in applications' folder.
-[ ] readme
+[ ] README (Overall)
 [ ] authorizer
 ```
 
@@ -26,3 +28,7 @@ To spin up infra structure. `yarn infra:up`
 To drop the infra structure. `yarn infra:down`
 
 NOTE: By spin up vs down it doesn't destroy the docker's volume.
+
+## Adding new service
+
+Register the service to the APIGW's configuration by updating: `infra/local-development/kong/kong.yaml`
